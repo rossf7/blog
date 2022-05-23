@@ -1,7 +1,7 @@
 baseurl = "/"
 copyright = "Ross Fairbanks"
 title = "Blog"
-theme = "PaperMod"
+theme = "papermod"
 
 [Params]
     mainSections = ["post"]
