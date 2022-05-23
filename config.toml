@@ -1,0 +1,31 @@
+baseurl = "/"
+copyright = "Ross Fairbanks"
+title = "Blog"
+theme = "PaperMod"
+
+[Params]
+    mainSections = ["post"]
+    intro = true
+    headline = "Blog"
+    description = "Personal blog of Ross Fairbanks"
+    github = "https://github.com/rossf7"
+    twitter = "https://twitter.com/rossf7"
+    opengraph = true
+    shareTwitter = true
+    dateFormat = "Mon, Jan 2, 2006"
+
+[Permalinks]
+    post = "/:year/:month/:day/:filename/"
+
+[menu]
+
+  [[menu.main]]
+    identifier = "home"
+    name = "Home"
+    url = "/"
+    weight = 10
+  [[menu.main]]
+    identifier = "about"
+    name = "About"
+    url = "/about/"
+    weight = 20
