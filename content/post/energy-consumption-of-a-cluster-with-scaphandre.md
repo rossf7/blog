@@ -1,12 +1,12 @@
 +++
 title = "Energy consumption of a Kubernetes cluster using Scaphandre"
-description = "Measuring energy consumption of a Kubernetes cluster using Scaphandre."
+description = "Measuring energy consumption of bare metal Kubernetes clusters using Scaphandre."
 tags = [
     "kubernetes",
     "rust",
     "sustainability",
 ]
-date = 2022-05-22T09:00:00Z
+date = 2022-05-23T09:00:00Z
 author = "Ross Fairbanks"
 +++
 
@@ -18,7 +18,7 @@ For running software [electricity](https://principles.green/principles/electrici
 
 [Scaphandre](https://github.com/hubblo-org/scaphandre) is a monitoring agent that provides energy consumption metrics. The project was founded by Benoit Petit in October 2020. The naming comes from "heavy diving suit" in French. I've been fortunate to be able to help with the Kubernetes integration which this post focuses on and its given me the chance to learn some Rust. Scapandre is developed in Rust to keep the footprint of the monitoring as low as possible.
 
-However Kubernetes isn't required. Scaphandre will work on any bare metal server providing the CPU and kernel has RAPL support. A great example is this [post](https://superuser.openstack.org/articles/environmental-reporting-dashboards-for-openstack-from-bbc-rd/) on how BBC R&D uses it and the UK National Grid [Carbon Intensity API](https://carbonintensity.org.uk/) to monitor their OpenStack data centres.
+However Kubernetes isn't required. Scaphandre will work on any bare metal server providing the CPU and kernel has RAPL support. A great example is this [post](https://superuser.openstack.org/articles/environmental-reporting-dashboards-for-openstack-from-bbc-rd/) on how BBC R&D uses it and the UK National Grid [Carbon Intensity API](https://carbonintensity.org.uk/) to monitor their 2 OpenStack data centres.
 
 RAPL (Running Average Power Limit) is a technology developed by Intel that is included in most Intel and AMD CPUs produced after 2012. In some cases it can also measure DRAM energy usage. The `powercap` part of the name comes from the PowerCap Linux kernel module. This writes the energy consumption data to files in `/sys/class/powercap`. This directory and `/proc` are mounted by Scaphandre and used as the source of the metrics. The [docs](https://hubblo-org.github.io/scaphandre-documentation/explanations/how-scaph-computes-per-process-power-consumption.html) have a much deeper explanation of how the per process consumption is calculated.
 
