@@ -34,7 +34,7 @@ There are some challenges here as the format of the cgroup file depends on the [
 
 ![Grafana dashboard with Scaphandre data](/images/scaphandre-dashboard.png)
 
-If you want to try out Scaphandre on a bare metal cluster there is a [tutorial](https://hubblo-org.github.io/scaphandre-documentation/tutorials/kubernetes.html) for installing it via its Helm chart along with Prometheus and Grafana to visualize the energy consumption of your cluster. Just be sure to check the [compatibility](https://hubblo-org.github.io/scaphandre-documentation/compatibility.html) docs to ensure your CPU and kernel is supported. 
+If you want to try out Scaphandre on a bare metal cluster there is a [tutorial](https://hubblo-org.github.io/scaphandre-documentation/tutorials/kubernetes.html) for installing it via its Helm chart along with Prometheus and Grafana to visualize the energy consumption of your cluster. Just be sure to check the [compatibility](https://hubblo-org.github.io/scaphandre-documentation/compatibility.html) docs to ensure your CPU and kernel are supported. 
 
 There is lots planned for the project including an estimation based sensor that will work with VMs including public cloud instances. So watch this space! Or even better, get in touch if you're interested in [contributing](https://hubblo-org.github.io/scaphandre-documentation/contributing.html).
 
