@@ -1,0 +1,38 @@
+baseurl: /
+copyright: Ross Fairbanks
+title: Blog
+theme: papermod
+
+params:
+  mainSections:
+    - post
+  intro: true
+  headline: Blog
+  description: Personal blog of Ross Fairbanks
+  github: https://github.com/rossf7
+  twitter: https://twitter.com/rossf7
+  opengraph: true
+  shareTwitter: true
+  dateFormat: Mon, Jan 2, 2006
+
+permalinks:
+  post: /:year/:month/:day/:filename/
+
+menu:
+  main:
+    - identifier: home
+      name: Home
+      url: /
+      weight: 10
+    - identifier: github
+      name: GitHub
+      url: https://github.com/rossf7
+      weight: 20
+    - identifier: twitter
+      name: Twitter
+      url: https://twitter.com/rossf7
+      weight: 30
+    - identifier: about
+      name: About
+      url: /about/
+      weight: 40
