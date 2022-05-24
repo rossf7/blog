@@ -1,16 +1,18 @@
-+++
-title = "Energy consumption of a Kubernetes cluster using Scaphandre"
-description = "Measuring energy consumption of bare metal Kubernetes clusters using Scaphandre."
-tags = [
-    "kubernetes",
-    "rust",
-    "sustainability",
-]
-date = 2022-05-23T09:00:00Z
-author = "Ross Fairbanks"
-+++
-
-![Wind turbine with sunflowers](/images/wind-turbine-with-sunflowers.jpeg)
+---
+author: Ross Fairbanks
+cover:
+  alt: Wind turbine with sunflowers
+  image: /images/wind-turbine-with-sunflowers.jpeg
+date: 2022-05-23T09:00:00.000Z
+description: >-
+  Measuring energy consumption of bare metal Kubernetes clusters using
+  Scaphandre.
+tags:
+  - kubernetes
+  - rust
+  - sustainability
+title: Energy consumption of a Kubernetes cluster using Scaphandre
+---
 
 [Green Software Engineering](https://greensoftware.foundation/articles/what-is-green-software) is a new and evolving branch of software engineering for building more sustainable systems. Using these types of techniques the tech sector can play its part in tackling the climate crisis and reducing our dependence on fossil fuels.
 
