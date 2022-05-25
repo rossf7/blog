@@ -2,7 +2,7 @@
 author: Ross Fairbanks
 cover:
   alt: Wind turbine with sunflowers
-  image: /images/wind-turbine-with-sunflowers.jpeg
+  image: https://rossfairbanks.com/images/wind-turbine-with-sunflowers.jpeg
 date: 2022-05-23T09:00:00.000Z
 description: >-
   Measuring energy consumption of bare metal Kubernetes clusters using
