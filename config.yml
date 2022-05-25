@@ -36,3 +36,6 @@ menu:
       name: About
       url: /about/
       weight: 40
+
+social:
+  twitter: rossf7
