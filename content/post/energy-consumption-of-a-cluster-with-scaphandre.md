@@ -16,7 +16,7 @@ title: Energy consumption of a Kubernetes cluster using Scaphandre
 
 [Green Software Engineering](https://greensoftware.foundation/articles/what-is-green-software) is a new and evolving branch of software engineering for building more sustainable systems. Using these types of techniques the tech sector can play its part in tackling the climate crisis and reducing our dependence on fossil fuels.
 
-For running software [electricity](https://principles.green/principles/electricity/) consumption is a key metric. Of course the source of that electricity and the carbon emissions [embodied](https://principles.green/principles/embodied-carbon/) in the hardware are also important. However even if the electricity sourced is 100% renewable, consuming less electricity frees it up to be used for other purposes.
+For running software [electricity](https://principles.green/principles/electricity/) consumption is a key metric. Of course the source of that electricity and the carbon emissions [embodied](https://principles.green/principles/embodied-carbon/) in the hardware are also important. However even if the electricity sourced consists of mainly renewable energy, consuming less electricity frees it up to be used for other purposes.
 
 [Scaphandre](https://github.com/hubblo-org/scaphandre) is a monitoring agent that provides energy consumption metrics. The project was founded by Benoit Petit in October 2020. The name comes from "heavy diving suit" in French. I've been fortunate to be able to help with the Kubernetes integration which this post focuses on and it's given me the chance to learn some Rust. Scaphandre is developed in Rust to keep the footprint of the monitoring as low as possible.
 
