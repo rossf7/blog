@@ -28,14 +28,18 @@ menu:
       name: GitHub
       url: https://github.com/rossf7
       weight: 20
+    - identifier: linkedin
+      name: LinkedIn
+      url: https://www.linkedin.com/in/rossfairbanks/
+      weight: 30
     - identifier: twitter
       name: Twitter
       url: https://twitter.com/rossf7
-      weight: 30
+      weight: 40
     - identifier: about
       name: About
       url: /about/
-      weight: 40
+      weight: 50
 
 social:
   twitter: rossf7
