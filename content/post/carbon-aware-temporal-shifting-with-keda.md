@@ -3,9 +3,9 @@ author: Ross Fairbanks
 cover:
   alt: Rampion Offshore Wind Farm, United Kingdom
   image: https://rossfairbanks.com/images/offshore-wind-farm.jpeg
-date: 2023-05-19T09:00:00.000Z
+date: 2023-05-23T09:00:00.000Z
 description: >-
-  Temporal shifting of kubernetes workloads using KEDA based on carbon intensity metrics.
+  Adding time based carbon awareness to Kubernetes workloads using KEDA.
 tags:
   - keda
   - kubernetes
