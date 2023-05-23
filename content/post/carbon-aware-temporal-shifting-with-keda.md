@@ -65,7 +65,7 @@ The forecast itself is stored as JSON in the binaryData section of the configmap
 
  The configmap design is nice as you could also develop your own exporter with your own source of carbon intensity data. Provided the data format is the same it can be used by the operator.
 
-Carbon aware scheduling is a new field and getting access to carbon intensity data is one of the main challenges. Both [WattTime](https://www.watttime.org/) and [Electricity Maps](https://www.electricitymaps.com/) play an important role in this ecosystem by providing commercial APIs that provide both current and forecast data for multiple geographies. There are still many challenges and the data is not perfect but over time the accuracy, coverage and granularity should all improve.
+Carbon aware scheduling is a new field and getting access to carbon intensity data is one of the main challenges. Both [WattTime](https://www.watttime.org/) and [Electricity Maps](https://www.electricitymaps.com/) play an important role in this ecosystem by providing commercial APIs that provide both current and forecast data for multiple geographies. 
 
 ## Operator
 
