@@ -126,4 +126,4 @@ There is a [proposal](https://github.com/kedacore/keda/issues/4463) from Microso
 
 Since the amount of renewable energy available depends on whether the wind is blowing and the sun is shining by using temporal shifting we can run some workloads at times when the generation mix is cleaner. So I think it's an important tool among the many tools we need to make our systems more sustainable.
 
-Photo by [Dariusz Piosik](https://unsplash.com/ko/@dariuszpi)) on [Unsplash](https://unsplash.com/photos/Tl6XKz6I6wc).
+Photo by [Dariusz Piosik](https://unsplash.com/ko/@dariuszpi) on [Unsplash](https://unsplash.com/photos/Tl6XKz6I6wc).
