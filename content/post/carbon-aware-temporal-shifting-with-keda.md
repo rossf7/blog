@@ -1,8 +1,8 @@
 ---
 author: Ross Fairbanks
 cover:
-  alt: Rampion Offshore Wind Farm, United Kingdom
-  image: https://rossfairbanks.com/images/offshore-wind-farm.jpeg
+  alt: Sundial on the coast.
+  image: https://rossfairbanks.com/images/sundial-on-the-coast.jpg
 date: 2023-05-23T09:00:00.000Z
 description: >-
   Adding time based carbon awareness to Kubernetes workloads using KEDA.
@@ -124,6 +124,6 @@ Both the operator and exporter can be run locally in a kind (kubernetes in docke
 
 There is a [proposal](https://github.com/kedacore/keda/issues/4463) from Microsoft to donate the operator into the KEDA project which I hope will go ahead. Building on this first release it would be great to see the exporter support Electricity Maps as well as WattTime and configuring the geolocation manually for on-prem and other cloud providers. Similarly the built in support for Azure regions in the Carbon Aware SDK is great but having the same for AWS and Google Cloud would be very useful.
 
-Since the amount of renewable energy available depends on whether the wind is blowing and the sun is shining by using temporal shifting we can run some workloads at times when the generation mix is cleaner. So I think it is one of the many tools we need in our toolbox to make our systems most sustainable.
+Since the amount of renewable energy available depends on whether the wind is blowing and the sun is shining by using temporal shifting we can run some workloads at times when the generation mix is cleaner. So I think it's an important tool among the many tools we need to make our systems more sustainable.
 
-Photo by [Nicholas Doherty](https://unsplash.com/@nrdoherty) on [Unsplash](https://unsplash.com/photos/pONBhDyOFoM).
+Photo by [Dariusz Piosik](https://unsplash.com/ko/@dariuszpi)) on [Unsplash](https://unsplash.com/photos/Tl6XKz6I6wc).
