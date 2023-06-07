@@ -126,11 +126,18 @@ For the configuration, the most challenging part is setting the thresholds. As t
 
 ## Conclusion
 
-Both the operator and exporter can be run locally in a kind (kubernetes in docker) cluster. I had some problems locally due to a lack of resources for the prometheus stack that is also installed. Running in a GitHub Codespace as recommended in the [docs](https://github.com/Azure/carbon-aware-keda-operator/blob/main/demo/kind.md) was the quickest way to get up and running.
+Both the operator and exporter can be run locally in a [kind](https://github.com/Azure/carbon-aware-keda-operator/blob/main/demo/kind.md) (kubernetes in docker) cluster. I had some problems locally due to a lack of resources for the prometheus stack that is also installed. Running in a GitHub Codespace as recommended in the docs was the quickest way to get up and running.
 
 There is a [proposal](https://github.com/kedacore/keda/issues/4463) from Microsoft to donate the operator to the KEDA project which I hope will go ahead. Building on this first release it would be great to see the exporter support Electricity Maps as well as WattTime and configuring the geolocation manually for on-prem and other cloud providers. Similarly, the built-in support for Azure regions in the Carbon Aware SDK is great but having the same for AWS and Google Cloud would be very useful.
 
 Since the amount of renewable energy available depends on whether the wind is blowing and the sun is shining by using temporal shifting we can run some workloads at times when the generation mix is cleaner. So I think it's an important tool among the many tools we need to make our systems more sustainable.
+
+## Update: Marginal vs Average carbon intensity
+
+Something I missed is that the WattTime API provides the marginal carbon intensity. This is calculated by identifying which power plant will provide the additional electricity requested. The alternative is to calculate the average carbon intensity for all power plants that are currently operating.
+
+This is quite a complex area and there has been some discussion on which calculation is best to use. This [blog post](
+https://www.electricitymaps.com/blog/marginal-vs-average-real-time-decision-making) from Electricity Maps explains in more detail. For me this is another benefit of supporting multiple data sources in the carbon-intensity-exporter so users can choose which is best for them.
 
 #### Credits
 
