@@ -14,14 +14,13 @@ tags:
 title: Carbon aware spatial shifting of Kubernetes workloads using Karmada
 ---
 
-In my last [post](https://rossfairbanks.com/2023/06/05/carbon-aware-temporal-shifting-with-keda/),
-I looked at temporal shifting of Kubernetes workloads using [KEDA](https://keda.sh)
-and the [carbon-aware-keda-operator](https://github.com/Azure/carbon-aware-keda-operator) from Microsoft. With this approach,
-non-time sensitive workloads can be run at times when the [carbon intensity](https://learn.greensoftware.foundation/carbon-awareness/#carbon-intensity)
-of the electricity grid being used is lowest.
+In this post, we'll look at carbon-aware scheduling using Kubernetes. This
+post focuses on spatial shifting using [Karmada](https://karmada.io). It follows on from my last [post](https://rossfairbanks.com/2023/06/05/carbon-aware-temporal-shifting-with-keda/) where I looked at temporal shifting using KEDA and the [carbon-aware-keda-operator](https://github.com/Azure/carbon-aware-keda-operator) from Microsoft.
 
-In this post we'll look at [spatial shifting](https://learn.greensoftware.foundation/carbon-awareness/#spatial-shifting),
-which involves shifting workloads to physical locations where the grid carbon intensity is lower. This allows
+Temporal shifting involves running non-time-sensitive workloads at times when the [carbon intensity](https://learn.greensoftware.foundation/carbon-awareness/#carbon-intensity) of the electricity grid being used is lower.
+
+[Spatial shifting](https://learn.greensoftware.foundation/carbon-awareness/#spatial-shifting)
+involves moving workloads to physical locations where the grid carbon intensity is lower. This allows
 workloads that are more time sensitive to be made carbon aware. It also enables a "follow the sun" model
 to be used to move workloads across different geographies depending on how much renewable energy is available.
 
@@ -184,11 +183,20 @@ This first version of the operator is a prototype to validate the idea and the
 approach. The current scheduling logic is basic and could be improved.
 It's also likely that more CRDs need to be managed. Karmada has support for
 [Federated HPA](https://karmada.io/docs/tutorials/autoscaling-with-federatedhpa)
-(Horizontal Pod Autoscaler) which would be very useful but uses additional CRDs.
+ (Horizontal Pod Autoscaler) which would be very useful but uses additional CRDs.
 
 If you want to try out the operator check out the [quick start](https://github.com/rossf7/carbon-aware-karmada-operator#quick-start).
 Feedback is much appreciated and if you're interested in collaborating to develop the
-operator further I'd be very interested.
+operator further please do get in touch.
+
+Since the carbon intensity of electricity grids depends on how much renewable energy is available
+by moving these workloads we can reduce the carbon emissions of our software. The scheduling
+described here is dynamic and the workloads deployed need to be fault tolerant so they can be moved
+without impacting users.
+
+However, less dynamic scheduling is also possible and can be very effective.
+A great example is included in the Green Software Foundation [docs](https://learn.greensoftware.foundation/carbon-awareness/#spatial-shifting) to move workloads
+between hemispheres as the seasons change to maximise the amount of daylight hours.
 
 #### Credits
 
