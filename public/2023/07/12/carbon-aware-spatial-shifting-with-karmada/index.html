@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Carbon aware spatial shifting of Kubernetes workloads using Karmada | Blog</title>
+<meta name="keywords" content="carbon-awareness, karmada, kubernetes, sustainability" />
+<meta name="description" content="Adding spatial carbon awareness to Kubernetes workloads using Karmada.">
+<meta name="author" content="Ross Fairbanks">
+<link rel="canonical" href="/2023/07/12/carbon-aware-spatial-shifting-with-karmada/" />
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css" integrity="sha256-yIlj/i15RiAA/Q&#43;xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.2840b7fccd34145847db71a290569594bdbdb00047097f75d6495d162f5d7dff.js" integrity="sha256-KEC3/M00FFhH23GikFaVlL29sABHCX911kldFi9dff8="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<meta name="generator" content="Hugo 0.98.0" />
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Carbon aware spatial shifting of Kubernetes workloads using Karmada" />
+<meta property="og:description" content="Adding spatial carbon awareness to Kubernetes workloads using Karmada." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/2023/07/12/carbon-aware-spatial-shifting-with-karmada/" />
+<meta property="og:image" content="https://rossfairbanks.com/images/tranmission-lines.jpg" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-07-12T09:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2023-07-12T09:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://rossfairbanks.com/images/tranmission-lines.jpg" />
+<meta name="twitter:title" content="Carbon aware spatial shifting of Kubernetes workloads using Karmada"/>
+<meta name="twitter:description" content="Adding spatial carbon awareness to Kubernetes workloads using Karmada."/>
+<meta name="twitter:site" content="@rossf7"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "/post/"
+    }
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Carbon aware spatial shifting of Kubernetes workloads using Karmada",
+      "item": "/2023/07/12/carbon-aware-spatial-shifting-with-karmada/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Carbon aware spatial shifting of Kubernetes workloads using Karmada",
+  "name": "Carbon aware spatial shifting of Kubernetes workloads using Karmada",
+  "description": "Adding spatial carbon awareness to Kubernetes workloads using Karmada.",
+  "keywords": [
+    "carbon-awareness", "karmada", "kubernetes", "sustainability"
+  ],
+  "articleBody": "In my last post I looked at temporal shifting of kubernetes workloads using KEDA and the carbon-aware-keda-operator from Microsoft. With this approach non time sensitive workloads can be run at times when the carbon intensity of the electricity grid being used is lowest.\nIn this post we’ll look at spatial shifting, this involves shifting workloads to physical locations where the grid carbon intensity is lower. This allows workloads that are more time sensitive to be made carbon aware. It also enables a “follow the sun” model to be used to move workloads across different geographies.\nHowever, as with temporal shifting there may be constraints that prevent spatial shifting. Such as regulatory requirements that data must be stored and processed in certain countries. Data gravity can be another constraint. For example, when training a machine learning model if it needs to fetch large quantities of data from another region this may slow the job, increase costs, and there will be carbon emissions from the network transfer.\nThis is an area the community has been looking at for some time. Including the paper “A Low Carbon Kubernetes Scheduler” from 2019. I proposed a possible solution using KubeFed in a blog post I wrote for the Green Web Foundation in 2022.\nKubeFed has now been retired and replaced by two projects, Karmada and Open Cluster Management.\nKarmada Karmada runs in a control plane cluster and consists of a series of controllers and a Karmada API Server as well as the Kubernetes API Server. Multiple member clusters can then be registered with Karmada.\nTo schedule resources in the member clusters the resource templates are created in the Karmada API server. These can be built in objects like configmaps or custom resources and CRDs (Custom Resource Definitions). No pods will be scheduled for these template resources in the control plane cluster.\nThe user then defines a Propogation Policy with which resources to select and where to place them. The member clusters are selected by setting the cluster affinities with the names of clusters. Here is an example policy for an nginx deployment.\napiVersion: policy.karmada.io/v1alpha1 kind: PropagationPolicy metadata:  name: nginx-propagation spec:  resourceSelectors:  - apiVersion: apps/v1  kind: Deployment  name: nginx  placement:  clusterAffinity:  clusterNames:  - member1  - member2  replicaScheduling:  replicaSchedulingType: Divided The easiest way to try Karmada is to follow their quick start which creates a control plane cluster and 3 member clusters using kind (Kubernetes in Docker). Just ensure your container engine has sufficient resources for 4 kind clusters!\ncarbon-aware-karmada-operator After trying out Karmada I think it has a lot of potential to be used for spatial shifting of workloads. So I’ve created a proof of concept carbon-aware-karmada-operator. The design follows the standard operator pattern of extending the Kubernetes API with a CRD and running a controller in the cluster that watches for these custom resources.\nThe CRD is called CarbonAwareKarmadaPolicy and here is an example resource.\napiVersion: carbonawarepolicy.rossf7.github.io/v1alpha1 kind: CarbonAwareKarmadaPolicy metadata:  name: nginx-policy spec:  clusterLocations:  - name: member1  location: DE  - name: member2  location: ES  - name: member2  location: FR  desiredClusters: 2  karmadaTarget: propagationpolicies.policy.karmada.io  karmadaTargetRef:  name: nginx-propagation  namespace: default For each member cluster we include its name and the location code used by the carbon intensity API. In this case its the country codes where the clusters are located but it could also be the name of the electricity grid e.g. CAISO_NORTH for Northern California. See the next section for more details on the carbon intensity integration.\nWe also specify how many member clusters are desired and the propagation policy to update to set the cluster affinities.\nRight now the scheduling logic is very basic. The operator ranks each member cluster by carbon intensity and selects the desired number of clusters with the lowest values. Every 5 minutes the operator will check if there is new carbon intensity data and repeat the ranking.\ngrid-intensity-go To access the carbon intensity data the operator uses the grid-intensity-go library from the Green Web Foundation (which I’m a contributor to). As well as being a Go library it also has a CLI and a Prometheus exporter for accessing carbon intensity data.\nIt supports multiple data providers including Electricity Maps and WattTime who provide data for multiple geographies. Both providers have commercial plans and free plans for non commercial use. For WattTime their free tier provides a relative value which can be used for ranking clusters but is less accurate than using absolute values.\nAnother important difference is Electricity Maps provides average carbon intensity and WattTime provides marginal carbon intensity. See this blog post for more details.\ngrid-intensity-go provides valid_from and valid_to dates for each location and the operator has an in-memory cache so it only requests new data when needed. This avoids hitting API rate limits and reduces the footprint of the operator by reducing the number of API calls it makes.\nStatus resource The operator sets the status of the custom resource to show which clusters were selected and the current carbon intensity data.\napiVersion: carbonaware.rossf7.github.io/v1alpha1 kind: CarbonAwareKarmadaPolicy metadata:  name: carbon-aware-nginx-policy spec:  ... status:  activeClusters:  - member1  - member2  clusters:  - carbonIntensity:  units: gCO2e per kWh  validFrom: \"2023-07-11T09:52:49Z\"  validTo: \"2023-07-11T09:00:00Z\"  value: \"64.0\"  location: FR  name: member1  - carbonIntensity:  units: gCO2e per kWh  validFrom: \"2023-07-11T09:53:05Z\"  validTo: \"2023-07-11T09:00:00Z\"  value: \"184.0\"  location: ES  name: member2  - carbonIntensity:  units: gCO2e per kWh  validFrom: \"2023-07-11T09:53:10Z\"  validTo: \"2023-07-11T09:00:00Z\"  value: \"285.0\"  location: DE  name: member3  provider: ElectricityMap The operator also emits Prometheus metrics per cluster with the carbon intensity and whether they are active.\ncurl -s http://localhost:8080/metrics | grep carbon_intensity # HELP carbon_aware_karmada_operator_cluster_carbon_intensity Cluster carbon intensity # TYPE carbon_aware_karmada_operator_cluster_carbon_intensity gauge carbon_aware_karmada_operator_cluster_carbon_intensity{active=\"false\",cluster=\"member3\",location=\"DE\"} 196 carbon_aware_karmada_operator_cluster_carbon_intensity{active=\"true\",cluster=\"member1\",location=\"FR\"} 51 carbon_aware_karmada_operator_cluster_carbon_intensity{active=\"true\",cluster=\"member2\",location=\"ES\"} 151 Conclusion Credits  Photo by Matthew Henry on Unsplash. Karmada architecture diagram  ",
+  "wordCount" : "941",
+  "inLanguage": "en",
+  "image":"https://rossfairbanks.com/images/tranmission-lines.jpg","datePublished": "2023-07-12T09:00:00Z",
+  "dateModified": "2023-07-12T09:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Ross Fairbanks"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/2023/07/12/carbon-aware-spatial-shifting-with-karmada/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="Blog (Alt + H)">Blog</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            
+            <li>
+                <a href="/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://github.com/rossf7" title="GitHub">
+                    <span>GitHub</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.linkedin.com/in/rossfairbanks/" title="LinkedIn">
+                    <span>LinkedIn</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://twitter.com/rossf7" title="Twitter">
+                    <span>Twitter</span>
+                </a>
+            </li>
+            <li>
+                <a href="/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div align="center"><a href="https://www.razomforukraine.org/razom-emergency-response/" target="_blank">This site stands with Ukraine<img src="/images/ua-heart-flag.png" /></a></div>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Carbon aware spatial shifting of Kubernetes workloads using Karmada
+    </h1>
+    <div class="post-description">
+      Adding spatial carbon awareness to Kubernetes workloads using Karmada.
+    </div>
+    <div class="post-meta"><span title='2023-07-12 09:00:00 +0000 UTC'>Wed, Jul 12, 2023</span>&nbsp;·&nbsp;Ross Fairbanks
+
+</div>
+  </header> 
+<figure class="entry-cover"><img loading="lazy" src="https://rossfairbanks.com/images/tranmission-lines.jpg" alt="Electricity transmission lines">
+        
+</figure>
+  <div class="post-content"><p>In my last <a href="https://rossfairbanks.com/2023/06/05/carbon-aware-temporal-shifting-with-keda/">post</a>
+I looked at temporal shifting of kubernetes workloads using <a href="https://keda.sh">KEDA</a>
+and the <a href="https://github.com/Azure/carbon-aware-keda-operator">carbon-aware-keda-operator</a> from Microsoft. With this approach
+non time sensitive workloads can be run at times when the <a href="https://learn.greensoftware.foundation/carbon-awareness/#carbon-intensity">carbon intensity</a>
+of the electricity grid being used is lowest.</p>
+<p>In this post we&rsquo;ll look at <a href="https://learn.greensoftware.foundation/carbon-awareness/#spatial-shifting">spatial shifting</a>,
+this involves shifting workloads to physical locations where the grid carbon intensity is lower. This allows
+workloads that are more time sensitive to be made carbon aware. It also enables a &ldquo;follow the sun&rdquo; model
+to be used to move workloads across different geographies.</p>
+<p>However, as with temporal shifting there may be constraints that prevent spatial shifting. Such as regulatory
+requirements that data must be stored and processed in certain countries. Data gravity can be another constraint.
+For example, when training a machine learning model if it needs to fetch large quantities of data from another
+region this may slow the job, increase costs, and there will be carbon emissions from the network transfer.</p>
+<p>This is an area the community has been looking at for some time. Including the <a href="https://ceur-ws.org/Vol-2382/ICT4S2019_paper_28.pdf">paper</a>
+&ldquo;A Low Carbon Kubernetes Scheduler&rdquo; from 2019. I proposed a possible solution using KubeFed in a <a href="https://www.thegreenwebfoundation.org/news/carbon-aware-scheduling-on-nomad-and-kubernetes/">blog post</a> I wrote for the Green Web Foundation in 2022.</p>
+<p>KubeFed has now been <a href="https://www.cncf.io/blog/2022/09/26/karmada-and-open-cluster-management-two-new-approaches-to-the-multicluster-fleet-management-challenge/">retired</a>
+and replaced by two projects, Karmada and Open Cluster Management.</p>
+<h2 id="karmada">Karmada<a hidden class="anchor" aria-hidden="true" href="#karmada">#</a></h2>
+<p><a href="https://karmada.io">Karmada</a> runs in a control plane cluster and consists of a series of controllers and a Karmada API Server as well
+as the Kubernetes API Server. Multiple member clusters can then be registered with Karmada.</p>
+<p><img loading="lazy" src="/images/karmada-architecture.png" alt="Karmada architecture diagram"  />
+</p>
+<p>To schedule resources in the member clusters the resource templates are created in the Karmada API server. These can be built in objects
+like configmaps or custom resources and CRDs (Custom Resource Definitions). No pods will be scheduled for these template resources in the control plane cluster.</p>
+<p>The user then defines a Propogation Policy with which resources to select and where to place them. The member clusters are
+selected by setting the cluster affinities with the names of clusters. Here is an example policy for an nginx deployment.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">policy.karmada.io/v1alpha1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">PropagationPolicy</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">nginx-propagation</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">resourceSelectors</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">name</span>: <span style="color:#ae81ff">nginx</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">placement</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">clusterAffinity</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">clusterNames</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">member1</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">member2</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">replicaScheduling</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">replicaSchedulingType</span>: <span style="color:#ae81ff">Divided</span>
+</span></span></code></pre></div><p>The easiest way to try Karmada is to follow their <a href="https://github.com/karmada-io/karmada#quick-start">quick start</a>
+which creates a control plane cluster and 3 member clusters using <a href="https://kind.sigs.k8s.io/">kind</a> (Kubernetes in Docker).
+Just ensure your container engine has sufficient resources for 4 kind clusters!</p>
+<h2 id="carbon-aware-karmada-operator">carbon-aware-karmada-operator<a hidden class="anchor" aria-hidden="true" href="#carbon-aware-karmada-operator">#</a></h2>
+<p>After trying out Karmada I think it has a lot of potential to be used for spatial shifting of workloads.
+So I&rsquo;ve created a proof of concept <a href="https://github.com/rossf7/carbon-aware-karmada-operator">carbon-aware-karmada-operator</a>.
+The design follows the standard operator pattern of extending the Kubernetes API with a CRD and
+running a controller in the cluster that watches for these custom resources.</p>
+<p>The CRD is called CarbonAwareKarmadaPolicy and here is an example resource.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">carbonawarepolicy.rossf7.github.io/v1alpha1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">CarbonAwareKarmadaPolicy</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">nginx-policy</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">clusterLocations</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">member1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">location</span>: <span style="color:#ae81ff">DE</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">member2</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">location</span>: <span style="color:#ae81ff">ES</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">member2</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">location</span>: <span style="color:#ae81ff">FR</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">desiredClusters</span>: <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">karmadaTarget</span>: <span style="color:#ae81ff">propagationpolicies.policy.karmada.io</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">karmadaTargetRef</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">nginx-propagation</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">default</span>
+</span></span></code></pre></div><p>For each member cluster we include its name and the location code used by the carbon intensity API. In this case its
+the country codes where the clusters are located but it could also be the name of the electricity grid e.g. <code>CAISO_NORTH</code>
+for Northern California. See the next section for more details on the carbon intensity integration.</p>
+<p>We also specify how many member clusters are desired and the propagation policy to update to set the cluster affinities.</p>
+<p>Right now the scheduling logic is very basic. The operator ranks each member cluster by carbon intensity and selects the
+desired number of clusters with the lowest values. Every 5 minutes the operator will check if there is new carbon intensity
+data and repeat the ranking.</p>
+<h2 id="grid-intensity-go">grid-intensity-go<a hidden class="anchor" aria-hidden="true" href="#grid-intensity-go">#</a></h2>
+<p>To access the carbon intensity data the operator uses the <a href="https://github.com/thegreenwebfoundation/grid-intensity-go">grid-intensity-go</a>
+library from the Green Web Foundation (which I&rsquo;m a contributor to). As well as being a Go library it also has a CLI and a Prometheus exporter for accessing carbon intensity data.</p>
+<p>It supports multiple data providers including <a href="https://www.electricitymaps.com/">Electricity Maps</a> and <a href="https://www.watttime.org/">WattTime</a>
+who provide data for multiple geographies. Both providers have commercial plans and free plans for non commercial use. For WattTime their
+free tier provides a relative value which can be used for ranking clusters but is less accurate than using absolute values.</p>
+<p>Another important difference is Electricity Maps provides average carbon intensity and WattTime provides marginal carbon intensity.
+See this <a href="https://www.electricitymaps.com/blog/marginal-vs-average-real-time-decision-making">blog post</a> for more details.</p>
+<p>grid-intensity-go provides <code>valid_from</code> and <code>valid_to</code> dates for each location and the operator has an in-memory cache so it only requests
+new data when needed. This avoids hitting API rate limits and reduces the footprint of the operator by reducing the number of API calls it makes.</p>
+<h2 id="status-resource">Status resource<a hidden class="anchor" aria-hidden="true" href="#status-resource">#</a></h2>
+<p>The operator sets the status of the custom resource to show which clusters were selected
+and the current carbon intensity data.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">carbonaware.rossf7.github.io/v1alpha1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">CarbonAwareKarmadaPolicy</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">carbon-aware-nginx-policy</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">...</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">status</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">activeClusters</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">member1</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">member2</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">clusters</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">carbonIntensity</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">units</span>: <span style="color:#ae81ff">gCO2e per kWh</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">validFrom</span>: <span style="color:#e6db74">&#34;2023-07-11T09:52:49Z&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">validTo</span>: <span style="color:#e6db74">&#34;2023-07-11T09:00:00Z&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">value</span>: <span style="color:#e6db74">&#34;64.0&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">location</span>: <span style="color:#ae81ff">FR</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">member1</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">carbonIntensity</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">units</span>: <span style="color:#ae81ff">gCO2e per kWh</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">validFrom</span>: <span style="color:#e6db74">&#34;2023-07-11T09:53:05Z&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">validTo</span>: <span style="color:#e6db74">&#34;2023-07-11T09:00:00Z&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">value</span>: <span style="color:#e6db74">&#34;184.0&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">location</span>: <span style="color:#ae81ff">ES</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">member2</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">carbonIntensity</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">units</span>: <span style="color:#ae81ff">gCO2e per kWh</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">validFrom</span>: <span style="color:#e6db74">&#34;2023-07-11T09:53:10Z&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">validTo</span>: <span style="color:#e6db74">&#34;2023-07-11T09:00:00Z&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">value</span>: <span style="color:#e6db74">&#34;285.0&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">location</span>: <span style="color:#ae81ff">DE</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">member3</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">provider</span>: <span style="color:#ae81ff">ElectricityMap</span>
+</span></span></code></pre></div><p>The operator also emits Prometheus metrics per cluster with the carbon intensity and whether they are active.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>curl -s http://localhost:8080/metrics | grep carbon_intensity
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># HELP carbon_aware_karmada_operator_cluster_carbon_intensity Cluster carbon intensity</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># TYPE carbon_aware_karmada_operator_cluster_carbon_intensity gauge</span>
+</span></span><span style="display:flex;"><span>carbon_aware_karmada_operator_cluster_carbon_intensity<span style="color:#f92672">{</span>active<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;false&#34;</span>,cluster<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;member3&#34;</span>,location<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;DE&#34;</span><span style="color:#f92672">}</span> <span style="color:#ae81ff">196</span>
+</span></span><span style="display:flex;"><span>carbon_aware_karmada_operator_cluster_carbon_intensity<span style="color:#f92672">{</span>active<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;true&#34;</span>,cluster<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;member1&#34;</span>,location<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;FR&#34;</span><span style="color:#f92672">}</span> <span style="color:#ae81ff">51</span>
+</span></span><span style="display:flex;"><span>carbon_aware_karmada_operator_cluster_carbon_intensity<span style="color:#f92672">{</span>active<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;true&#34;</span>,cluster<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;member2&#34;</span>,location<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;ES&#34;</span><span style="color:#f92672">}</span> <span style="color:#ae81ff">151</span>
+</span></span></code></pre></div><h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<h4 id="credits">Credits<a hidden class="anchor" aria-hidden="true" href="#credits">#</a></h4>
+<ul>
+<li>Photo by <a href="https://unsplash.com/@matthewhenry">Matthew Henry</a> on <a href="https://unsplash.com/photos/yETqkLnhsUI">Unsplash</a>.</li>
+<li><a href="https://github.com/karmada-io/karmada/blob/ccd8c3f863401ecf00bc8589e476bd5169d43d5f/docs/images/architecture.png">Karmada architecture diagram</a></li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="/tags/carbon-awareness/">carbon-awareness</a></li>
+      <li><a href="/tags/karmada/">karmada</a></li>
+      <li><a href="/tags/kubernetes/">kubernetes</a></li>
+      <li><a href="/tags/sustainability/">sustainability</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; Ross Fairbanks 2023</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> ,
+        <a href="https://www.netlify.com/" rel="noopener noreferrer" target="_blank">Netlify</a> &
+        <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

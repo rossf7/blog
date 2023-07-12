@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Carbon aware temporal shifting of Kubernetes workloads using KEDA | Blog</title>
+<meta name="keywords" content="carbon-awareness, keda, kubernetes, sustainability" />
+<meta name="description" content="Adding time based carbon awareness to Kubernetes workloads using KEDA.">
+<meta name="author" content="Ross Fairbanks">
+<link rel="canonical" href="/2023/06/05/carbon-aware-temporal-shifting-with-keda/" />
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css" integrity="sha256-yIlj/i15RiAA/Q&#43;xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.2840b7fccd34145847db71a290569594bdbdb00047097f75d6495d162f5d7dff.js" integrity="sha256-KEC3/M00FFhH23GikFaVlL29sABHCX911kldFi9dff8="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<meta name="generator" content="Hugo 0.98.0" />
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Carbon aware temporal shifting of Kubernetes workloads using KEDA" />
+<meta property="og:description" content="Adding time based carbon awareness to Kubernetes workloads using KEDA." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/2023/06/05/carbon-aware-temporal-shifting-with-keda/" />
+<meta property="og:image" content="https://rossfairbanks.com/images/sundial-on-the-coast.jpg" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-06-05T09:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2023-06-05T09:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://rossfairbanks.com/images/sundial-on-the-coast.jpg" />
+<meta name="twitter:title" content="Carbon aware temporal shifting of Kubernetes workloads using KEDA"/>
+<meta name="twitter:description" content="Adding time based carbon awareness to Kubernetes workloads using KEDA."/>
+<meta name="twitter:site" content="@rossf7"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "/post/"
+    }
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Carbon aware temporal shifting of Kubernetes workloads using KEDA",
+      "item": "/2023/06/05/carbon-aware-temporal-shifting-with-keda/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Carbon aware temporal shifting of Kubernetes workloads using KEDA",
+  "name": "Carbon aware temporal shifting of Kubernetes workloads using KEDA",
+  "description": "Adding time based carbon awareness to Kubernetes workloads using KEDA.",
+  "keywords": [
+    "carbon-awareness", "keda", "kubernetes", "sustainability"
+  ],
+  "articleBody": "The Carbon Aware KEDA Operator was announced by Microsoft in April this year in a keynote at KubeCon EU in Amsterdam. Sadly I couldn’t attend KubeCon this time but it was good to see from afar that there were more sustainability talks and the great work the Environmental Sustainability TAG (Technical Advisory Group) is doing coordinating efforts across the CNCF and liaising with other organizations like the Green Software Foundation.\nCarbon aware scheduling is an area of green software I’ve been interested in for some time. Last year I wrote about some possible approaches in a blog post for the Green Web Foundation. So once I’d tried the new operator I was keen to write about it.\nThe operator builds on top of KEDA (Kubernetes Event Driven Autoscaling) which is a CNCF project that in turn builds on top of the built-in Kubernetes Horizontal Pod Autoscaler. KEDA provides scalers for many components. Some of which run in the cluster like Prometheus or Kafka and others that run outside for cloud services like message queues. This allows KEDA to scale how many replicas of a container should be deployed based on these metrics.\nTemporal shifting is a form of carbon aware scheduling to run workloads at different times depending on how much renewable energy is available. The alternative is spatial shifting to run workloads in locations where more renewable energy is currently available. However, moving workloads is not always possible due to data gravity or regulatory constraints.\nTemporal shifting is also not possible for time critical workloads e.g. processing a credit card payment. However other workloads like encoding videos or training machine learning models can often be delayed for quite some time without impacting users. In fact Google uses this approach for processing videos uploaded to YouTube and files uploaded to Drive.\nCarbon intensity metrics Carbon intensity is a measure of how much CO2 is emitted per kilowatt-hour of electricity consumed. For an electricity grid this can vary widely depending on the generation mix of renewable energy (typically wind and solar) versus fossil fuels (coal and gas).\nTo be able to scale based on carbon intensity these metrics need to be present in the cluster. To do this Microsoft has released a 2nd component, the carbon-intensity-exporter. This uses the WattTime API as its data source.\nI like how this is integrated as the exporter pod includes a 2nd container which is an instance of the Carbon Aware SDK running in API mode. The SDK is a tool developed by the Green Software Foundation and means that in the future the exporter can integrate with any data source supported by the SDK.\nAnother feature I like is that the exporter can be configured with the Azure region where the cluster is running. The SDK uses this to map the region to a geolocation. This is passed to the WattTime API and used to identify which grid this region is connected to e.g. the Azure westus region maps to the CAISO_NORTH grid region in California. Right now only Azure is supported but in the future, it would be great to see support for more cloud providers.\nNow the exporter knows where it’s running it fetches the carbon intensity forecast for the grid for the next 24 hours and saves it to a configmap that is used by the operator. Every 12 hours the exporter will fetch a new forecast and save the updated data to the configmap.\napiVersion: v1 kind: ConfigMap binaryData: data: forecastDateTime: 2023-05-23 11:15:00 +0000 UTC lastHeartbeatTime: 2023-05-23 11:10:21.589054506 +0000 UTC m=+20.073269902 maxForecast: \"425.399821\" minForecast: \"27.466212\" numOfRecords: \"288\" immutable: true metadata: name: carbon-intensity namespace: kube-system The forecast itself is stored as JSON in the binaryData section of the configmap.\n[ { \"location\": \"CAISO_NORTH\", \"timestamp\": \"2023-05-23T12:00:00Z\", \"duration\": 5, \"value\": 327.255765552367 }, … ] As you can see, for this day the best time to scale up is during daylight hours when solar energy is plentiful and before demand increases in the afternoon.\nThe configmap design is nice as you could also develop your own exporter with a different source of carbon intensity data. Provided the data format is the same it can be used by the operator.\nCarbon aware scheduling is a new field and getting access to carbon intensity data is one of the main challenges. Both WattTime and Electricity Maps play an important role in this ecosystem by providing commercial APIs that provide both current and forecast data for multiple geographies. They both also have free APIs which are useful for some forms of carbon aware scheduling but don’t include forecast data which is important for temporal shifting.\nOperator To build on top of KEDA once an hour the operator sets the maximum number of replicas based on the carbon intensity data in the configmap. Based on configurable thresholds this means the workload can be scaled up or down depending on the carbon intensity. It is also possible to disable the scaling entirely at certain times e.g. when the system experiences peak loads.\nThe design is implemented this way because the primary scaling mechanism remains the KEDA scaler. For the demo workload, this is the length of a Redis list but it could be any of the supported KEDA scalers. So the number of pods running depends on the length of the list but the operator sets the maximum number of pods allowed.\nThe design follows the standard operator pattern of extending the Kubernetes API with a CRD (Custom Resource Definition) and running a controller in the cluster that watches for these custom resources.\nLet’s take a look at the custom resource for the demo workload.\napiVersion: carbonaware.kubernetes.azure.com/v1alpha1 kind: CarbonAwareKedaScaler metadata: name: carbon-aware-word-processor-scaler namespace: default spec: kedaTarget: scaledobjects.keda.sh kedaTargetRef: name: word-processor-scaler namespace: default carbonIntensityForecastDataSource: localConfigMap: key: data name: carbon-intensity namespace: kube-system mockCarbonForecast: false maxReplicasByCarbonIntensity: - carbonIntensityThreshold: 50 maxReplicas: 110 - carbonIntensityThreshold: 80 maxReplicas: 60 - carbonIntensityThreshold: 100 maxReplicas: 10 ecoModeOff: carbonIntensityDuration: carbonIntensityThreshold: 555 overrideEcoAfterDurationInMins: 45 maxReplicas: 100 recurringSchedule: - '* 23 * * 1-5' The kedaTarget and kedaTargetRef sections configure which KEDA custom resource should be managed. In this case, it is a scaled object that maps to a kubernetes deployment but it could also be a scaled job for batch workloads. The carbonIntensityForecastDataSource section configures which configmap to use as the source of carbon intensity data.\nMost importantly the maxReplicasByCarbonIntensity section has the carbon intensity thresholds in gCO2eq/kWh and the max number of replicas for each. Lastly, the ecoModeOff section allows configuring when the scaling should be disabled and how many replicas to run during these periods.\nFor the configuration, the most challenging part is setting the thresholds. As the values to use depends on the electricity grid region. The exporter tries to help by storing the min and max forecast values in the configmap. However, as the docs recommend to have accurate values you should look at monthly and annual data for the grid region.\nConclusion Both the operator and exporter can be run locally in a kind (kubernetes in docker) cluster. I had some problems locally due to a lack of resources for the prometheus stack that is also installed. Running in a GitHub Codespace as recommended in the docs was the quickest way to get up and running.\nThere is a proposal from Microsoft to donate the operator to the KEDA project which I hope will go ahead. Building on this first release it would be great to see the exporter support Electricity Maps as well as WattTime and configuring the geolocation manually for on-prem and other cloud providers. Similarly, the built-in support for Azure regions in the Carbon Aware SDK is great but having the same for AWS and Google Cloud would be very useful.\nSince the amount of renewable energy available depends on whether the wind is blowing and the sun is shining by using temporal shifting we can run some workloads at times when the generation mix is cleaner. So I think it’s an important tool among the many tools we need to make our systems more sustainable.\nUpdate: Marginal vs Average carbon intensity Something I missed is that the WattTime API provides the marginal carbon intensity. This is calculated by identifying which power plant will provide the additional electricity requested. The alternative is to calculate the average carbon intensity for all power plants that are currently operating.\nThis is quite a complex area and there has been some discussion on which calculation is best to use. This blog post from Electricity Maps explains in more detail. For me this is another benefit of supporting multiple data sources in the carbon-intensity-exporter so users can choose which is best for them.\nCredits  Photo by Dariusz Piosik on Unsplash. Carbon intensity data from WattTime. Carbon aware KEDA operator diagram from Microsoft.  ",
+  "wordCount" : "1456",
+  "inLanguage": "en",
+  "image":"https://rossfairbanks.com/images/sundial-on-the-coast.jpg","datePublished": "2023-06-05T09:00:00Z",
+  "dateModified": "2023-06-05T09:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Ross Fairbanks"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/2023/06/05/carbon-aware-temporal-shifting-with-keda/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="Blog (Alt + H)">Blog</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            
+            <li>
+                <a href="/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://github.com/rossf7" title="GitHub">
+                    <span>GitHub</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.linkedin.com/in/rossfairbanks/" title="LinkedIn">
+                    <span>LinkedIn</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://twitter.com/rossf7" title="Twitter">
+                    <span>Twitter</span>
+                </a>
+            </li>
+            <li>
+                <a href="/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div align="center"><a href="https://www.razomforukraine.org/razom-emergency-response/" target="_blank">This site stands with Ukraine<img src="/images/ua-heart-flag.png" /></a></div>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Carbon aware temporal shifting of Kubernetes workloads using KEDA
+    </h1>
+    <div class="post-description">
+      Adding time based carbon awareness to Kubernetes workloads using KEDA.
+    </div>
+    <div class="post-meta"><span title='2023-06-05 09:00:00 +0000 UTC'>Mon, Jun 5, 2023</span>&nbsp;·&nbsp;Ross Fairbanks
+
+</div>
+  </header> 
+<figure class="entry-cover"><img loading="lazy" src="https://rossfairbanks.com/images/sundial-on-the-coast.jpg" alt="Sundial on the coast.">
+        
+</figure>
+  <div class="post-content"><p>The <a href="https://github.com/Azure/carbon-aware-keda-operator">Carbon Aware KEDA Operator</a> was announced by Microsoft in April this year in a <a href="https://www.youtube.com/watch?v=s7K7QkhWnFU&amp;list=PLj6h78yzYM2PyrvCoOii4rAopBswfz1p7&amp;index=6">keynote</a> at KubeCon EU in Amsterdam. Sadly I couldn&rsquo;t attend KubeCon this time but it was good to see from afar that there were more sustainability talks and the great work the <a href="https://github.com/cncf/tag-env-sustainability">Environmental Sustainability</a> TAG (Technical Advisory Group) is doing coordinating efforts across the CNCF and liaising with other organizations like the <a href="https://greensoftware.foundation/">Green Software Foundation</a>.</p>
+<p>Carbon aware scheduling is an area of green software I’ve been interested in for some time. Last year I wrote about some <a href="https://www.thegreenwebfoundation.org/news/carbon-aware-scheduling-on-nomad-and-kubernetes/">possible approaches</a> in a blog post for the Green Web Foundation. So once I’d tried the new operator I was keen to write about it.</p>
+<p>The operator builds on top of <a href="https://keda.sh/">KEDA</a> (Kubernetes Event Driven Autoscaling) which is a CNCF project that in turn builds on top of the built-in Kubernetes Horizontal Pod Autoscaler. KEDA provides <a href="https://keda.sh/docs/2.10/scalers/">scalers</a> for many components. Some of which run in the cluster like Prometheus or Kafka and others that run outside for cloud services like message queues. This allows KEDA to scale how many replicas of a container should be deployed based on these metrics.</p>
+<p><a href="https://learn.greensoftware.foundation/carbon-awareness#temporal-shifting">Temporal shifting</a> is a form of carbon aware scheduling to run workloads at different times depending on how much renewable energy is available. The alternative is spatial shifting to run workloads in locations where more renewable energy is currently available. However, moving workloads is not always possible due to data gravity or regulatory constraints.</p>
+<p>Temporal shifting is also not possible for time critical workloads e.g. processing a credit card payment. However other workloads like encoding videos or training machine learning models can often be delayed for quite some time without impacting users. In fact <a href="https://blog.google/outreach-initiatives/sustainability/carbon-aware-computing-location/">Google</a> uses this approach for processing videos uploaded to YouTube and files uploaded to Drive.</p>
+<h2 id="carbon-intensity-metrics">Carbon intensity metrics<a hidden class="anchor" aria-hidden="true" href="#carbon-intensity-metrics">#</a></h2>
+<p><a href="https://learn.greensoftware.foundation/carbon-awareness#carbon-intensity">Carbon intensity</a> is a measure of how much CO2 is emitted per kilowatt-hour of electricity consumed. For an electricity grid this can vary widely depending on the generation mix of renewable energy (typically wind and solar) versus fossil fuels (coal and gas).</p>
+<p>To be able to scale based on carbon intensity these metrics need to be present in the cluster. To do this Microsoft has released a 2nd component, the <a href="https://github.com/Azure/kubernetes-carbon-intensity-exporter/">carbon-intensity-exporter</a>. This uses the <a href="https://www.watttime.org/">WattTime</a> API as its data source.</p>
+<p>I like how this is integrated as the exporter pod includes a 2nd container which is an instance of the <a href="https://github.com/Green-Software-Foundation/carbon-aware-sdk">Carbon Aware SDK</a> running in API mode. The SDK is a tool developed by the Green Software Foundation and means that in the future the exporter can integrate with any data source supported by the SDK.</p>
+<p>Another feature I like is that the exporter can be configured with the Azure region where the cluster is running. The SDK uses this to map the region to a geolocation. This is passed to the WattTime API and used to identify which grid this region is connected to e.g. the Azure <code>westus</code> region maps to the <code>CAISO_NORTH</code> grid region in California. Right now only Azure is supported but in the future, it would be great to see support for more cloud providers.</p>
+<p>Now the exporter knows where it’s running it fetches the carbon intensity forecast for the grid for the next 24 hours and saves it to a configmap that is used by the operator. Every 12 hours the exporter will fetch a new forecast and save the updated data to the configmap.</p>
+<pre tabindex="0"><code>apiVersion: v1
+kind: ConfigMap
+binaryData:
+data:
+  forecastDateTime: 2023-05-23 11:15:00 +0000 UTC
+  lastHeartbeatTime: 2023-05-23 11:10:21.589054506 +0000 UTC m=+20.073269902
+  maxForecast: &#34;425.399821&#34;
+  minForecast: &#34;27.466212&#34;
+  numOfRecords: &#34;288&#34;
+immutable: true
+metadata:
+  name: carbon-intensity
+  namespace: kube-system
+</code></pre><p>The forecast itself is stored as JSON in the binaryData section of the configmap.</p>
+<pre tabindex="0"><code>[
+  {
+    &#34;location&#34;: &#34;CAISO_NORTH&#34;,
+    &#34;timestamp&#34;: &#34;2023-05-23T12:00:00Z&#34;,
+    &#34;duration&#34;: 5,
+    &#34;value&#34;: 327.255765552367
+  },
+ …
+]
+</code></pre><p><img loading="lazy" src="/images/carbon-intensity-forecast-caiso-north.png" alt="Carbon intensity forecast for CAISO_NORTH grid region"  />
+</p>
+<p>As you can see, for this day the best time to scale up is during daylight hours when solar energy is plentiful and before demand increases in the afternoon.</p>
+<p>The configmap design is nice as you could also develop your own exporter with a different source of carbon intensity data. Provided the data format is the same it can be used by the operator.</p>
+<p>Carbon aware scheduling is a new field and getting access to carbon intensity data is one of the main challenges. Both <a href="https://www.watttime.org/">WattTime</a> and <a href="https://www.electricitymaps.com/">Electricity Maps</a> play an important role in this ecosystem by providing commercial APIs that provide both current and forecast data for multiple geographies. They both also have free APIs which are useful for some forms of carbon aware scheduling but don&rsquo;t include forecast data which is important for temporal shifting.</p>
+<h2 id="operator">Operator<a hidden class="anchor" aria-hidden="true" href="#operator">#</a></h2>
+<p>To build on top of KEDA once an hour the operator sets the maximum number of replicas based on the carbon intensity data in the configmap. Based on configurable thresholds this means the workload can be scaled up or down depending on the carbon intensity. It is also possible to disable the scaling entirely at certain times e.g. when the system experiences peak loads.</p>
+<p><img loading="lazy" src="/images/carbon-aware-keda-operator-arch.png" alt="Carbon aware KEDA operator"  />
+</p>
+<p>The design is implemented this way because the primary scaling mechanism remains the KEDA scaler. For the demo workload, this is the length of a Redis list but it could be any of the supported KEDA scalers. So the number of pods running depends on the length of the list but the operator sets the maximum number of pods allowed.</p>
+<p>The design follows the standard operator pattern of extending the Kubernetes API with a CRD (Custom Resource Definition) and running a controller in the cluster that watches for these custom resources.</p>
+<p>Let’s take a look at the custom resource for the demo workload.</p>
+<pre tabindex="0"><code>apiVersion: carbonaware.kubernetes.azure.com/v1alpha1
+kind: CarbonAwareKedaScaler
+metadata:
+  name: carbon-aware-word-processor-scaler
+  namespace: default
+spec:
+  kedaTarget: scaledobjects.keda.sh
+  kedaTargetRef:
+    name: word-processor-scaler
+    namespace: default
+  carbonIntensityForecastDataSource:
+    localConfigMap:
+      key: data
+      name: carbon-intensity
+      namespace: kube-system
+    mockCarbonForecast: false
+  maxReplicasByCarbonIntensity:
+  - carbonIntensityThreshold: 50
+    maxReplicas: 110
+  - carbonIntensityThreshold: 80
+    maxReplicas: 60
+  - carbonIntensityThreshold: 100
+    maxReplicas: 10
+  ecoModeOff:
+    carbonIntensityDuration:
+      carbonIntensityThreshold: 555
+      overrideEcoAfterDurationInMins: 45
+    maxReplicas: 100
+    recurringSchedule:
+    - &#39;* 23 * * 1-5&#39;
+</code></pre><p>The <strong>kedaTarget</strong> and <strong>kedaTargetRef</strong> sections configure which KEDA custom resource should be managed. In this case, it is a <a href="https://keda.sh/docs/2.10/concepts/scaling-deployments/">scaled object</a> that maps to a kubernetes deployment but it could also be a scaled job for batch workloads. The <strong>carbonIntensityForecastDataSource</strong> section configures which configmap to use as the source of carbon intensity data.</p>
+<p>Most importantly the <strong>maxReplicasByCarbonIntensity</strong> section has the carbon intensity thresholds in gCO2eq/kWh and the max number of replicas for each. Lastly, the <strong>ecoModeOff</strong> section allows configuring when the scaling should be disabled and how many replicas to run during these periods.</p>
+<p>For the configuration, the most challenging part is setting the thresholds. As the values to use depends on the electricity grid region. The exporter tries to help by storing the min and max forecast values in the configmap. However, as the <a href="https://github.com/Azure/carbon-aware-keda-operator#how-do-i-set-the-carbon-intensity-thresholds-in-the-carbonawarekedascaler-crd">docs recommend</a> to have accurate values you should look at monthly and annual data for the grid region.</p>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Both the operator and exporter can be run locally in a <a href="https://github.com/Azure/carbon-aware-keda-operator/blob/main/demo/kind.md">kind</a> (kubernetes in docker) cluster. I had some problems locally due to a lack of resources for the prometheus stack that is also installed. Running in a GitHub Codespace as recommended in the docs was the quickest way to get up and running.</p>
+<p>There is a <a href="https://github.com/kedacore/keda/issues/4463">proposal</a> from Microsoft to donate the operator to the KEDA project which I hope will go ahead. Building on this first release it would be great to see the exporter support Electricity Maps as well as WattTime and configuring the geolocation manually for on-prem and other cloud providers. Similarly, the built-in support for Azure regions in the Carbon Aware SDK is great but having the same for AWS and Google Cloud would be very useful.</p>
+<p>Since the amount of renewable energy available depends on whether the wind is blowing and the sun is shining by using temporal shifting we can run some workloads at times when the generation mix is cleaner. So I think it&rsquo;s an important tool among the many tools we need to make our systems more sustainable.</p>
+<h2 id="update-marginal-vs-average-carbon-intensity">Update: Marginal vs Average carbon intensity<a hidden class="anchor" aria-hidden="true" href="#update-marginal-vs-average-carbon-intensity">#</a></h2>
+<p>Something I missed is that the WattTime API provides the marginal carbon intensity. This is calculated by identifying which power plant will provide the additional electricity requested. The alternative is to calculate the average carbon intensity for all power plants that are currently operating.</p>
+<p>This is quite a complex area and there has been some discussion on which calculation is best to use. This <a href="https://www.electricitymaps.com/blog/marginal-vs-average-real-time-decision-making">blog post</a> from Electricity Maps explains in more detail. For me this is another benefit of supporting multiple data sources in the carbon-intensity-exporter so users can choose which is best for them.</p>
+<h4 id="credits">Credits<a hidden class="anchor" aria-hidden="true" href="#credits">#</a></h4>
+<ul>
+<li>Photo by <a href="https://unsplash.com/ko/@dariuszpi">Dariusz Piosik</a> on <a href="https://unsplash.com/photos/Tl6XKz6I6wc">Unsplash</a>.</li>
+<li>Carbon intensity data from <a href="https://watttime.org">WattTime</a>.</li>
+<li><a href="https://user-images.githubusercontent.com/966110/232321762-bb114716-f719-4e1f-9dc0-20680c94ab52.png">Carbon aware KEDA operator diagram</a> from Microsoft.</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="/tags/carbon-awareness/">carbon-awareness</a></li>
+      <li><a href="/tags/keda/">keda</a></li>
+      <li><a href="/tags/kubernetes/">kubernetes</a></li>
+      <li><a href="/tags/sustainability/">sustainability</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; Ross Fairbanks 2023</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> ,
+        <a href="https://www.netlify.com/" rel="noopener noreferrer" target="_blank">Netlify</a> &
+        <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
