@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Tags on Blog</title>
+    <link>/tags/</link>
+    <description>Recent content in Tags on Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <copyright>Ross Fairbanks</copyright>
+    <lastBuildDate>Wed, 12 Jul 2023 09:00:00 +0000</lastBuildDate><atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>carbon-awareness</title>
+      <link>/tags/carbon-awareness/</link>
+      <pubDate>Wed, 12 Jul 2023 09:00:00 +0000</pubDate>
+      
+      <guid>/tags/carbon-awareness/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>karmada</title>
+      <link>/tags/karmada/</link>
+      <pubDate>Wed, 12 Jul 2023 09:00:00 +0000</pubDate>
+      
+      <guid>/tags/karmada/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kubernetes</title>
+      <link>/tags/kubernetes/</link>
+      <pubDate>Wed, 12 Jul 2023 09:00:00 +0000</pubDate>
+      
+      <guid>/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>sustainability</title>
+      <link>/tags/sustainability/</link>
+      <pubDate>Wed, 12 Jul 2023 09:00:00 +0000</pubDate>
+      
+      <guid>/tags/sustainability/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>keda</title>
+      <link>/tags/keda/</link>
+      <pubDate>Mon, 05 Jun 2023 09:00:00 +0000</pubDate>
+      
+      <guid>/tags/keda/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>rust</title>
+      <link>/tags/rust/</link>
+      <pubDate>Mon, 23 May 2022 09:00:00 +0000</pubDate>
+      
+      <guid>/tags/rust/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

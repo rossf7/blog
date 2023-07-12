@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>karmada on Blog</title>
+    <link>/tags/karmada/</link>
+    <description>Recent content in karmada on Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <copyright>Ross Fairbanks</copyright>
+    <lastBuildDate>Wed, 12 Jul 2023 09:00:00 +0000</lastBuildDate><atom:link href="/tags/karmada/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Carbon aware spatial shifting of Kubernetes workloads using Karmada</title>
+      <link>/2023/07/12/carbon-aware-spatial-shifting-with-karmada/</link>
+      <pubDate>Wed, 12 Jul 2023 09:00:00 +0000</pubDate>
+      
+      <guid>/2023/07/12/carbon-aware-spatial-shifting-with-karmada/</guid>
+      <description>Adding spatial carbon awareness to Kubernetes workloads using Karmada.</description>
+    </item>
+    
+  </channel>
+</rss>

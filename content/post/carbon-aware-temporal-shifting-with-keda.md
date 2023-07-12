@@ -7,6 +7,7 @@ date: 2023-06-05T09:00:00.000Z
 description: >-
   Adding time based carbon awareness to Kubernetes workloads using KEDA.
 tags:
+  - carbon-awareness
   - keda
   - kubernetes
   - sustainability
