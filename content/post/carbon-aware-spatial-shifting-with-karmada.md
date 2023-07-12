@@ -2,7 +2,7 @@
 author: Ross Fairbanks
 cover:
   alt: Electricity transmission lines
-  image: https://rossfairbanks.com/images/tranmission-lines.jpg
+  image: https://rossfairbanks.com/images/transmission-lines.jpg
 date: 2023-07-12T09:00:00.000Z
 description: >-
   Adding spatial carbon awareness to Kubernetes workloads using Karmada.
