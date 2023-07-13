@@ -81,7 +81,7 @@ running a controller in the cluster that watches for these custom resources.
 The CRD is called CarbonAwareKarmadaPolicy and here is an example resource.
 
 ```yaml
-apiVersion: carbonawarepolicy.rossf7.github.io/v1alpha1
+apiVersion: carbonaware.rossf7.github.io/v1alpha1
 kind: CarbonAwareKarmadaPolicy
 metadata:
   name: nginx-policy
