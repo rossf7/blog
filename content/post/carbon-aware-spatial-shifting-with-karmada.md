@@ -198,6 +198,9 @@ However, less dynamic scheduling is also possible and can be very effective.
 A great example is included in the Green Software Foundation [docs](https://learn.greensoftware.foundation/carbon-awareness/#spatial-shifting) to move workloads
 between hemispheres as the seasons change to maximise the amount of daylight hours.
 
+My blog doesn't have comments but you can discuss the ideas here in this [GSF discussion](https://github.com/orgs/Green-Software-Foundation/discussions/36) on
+carbon aware scheduling with Kubernetes.
+
 #### Credits
 
 - Photo by [Matthew Henry](https://unsplash.com/@matthewhenry) on [Unsplash](https://unsplash.com/photos/yETqkLnhsUI).
