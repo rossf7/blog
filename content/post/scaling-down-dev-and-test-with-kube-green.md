@@ -5,7 +5,7 @@ cover:
   image: https://rossfairbanks.com/images/light-bulbs-and-plants.jpg
 date: 2023-09-08T09:00:00.000Z
 description: >-
-  Scaling down non-production environments with kube-green.
+  Using kube-green to suspend and resume non-production environments.
 tags:
   - kubernetes
   - sustainability
