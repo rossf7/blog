@@ -43,7 +43,7 @@ spec:
 
 This will suspend all cron jobs and scale down all deployments except api-gateway. This will happen at 20:00 each week day and wake up will happen at 08:00. During the weekend the pods will be scaled down.
 
-There is one more step needed. In our cluster we need the cluster-autoscaler running.  This will scale down the cluster nodes and scale them back up again. Usually isn’t possible for on premise clusters. Although kube-green will free up resources so they can be used for other tasks.
+There is one more step needed. In our cluster we need the cluster-autoscaler running.  This will scale down the cluster nodes and scale them back up again. Usually this isn’t possible for on premise clusters. Although kube-green will free up resources so they can be used for other tasks.
 
 The docs have [install](https://kube-green.dev/docs/install/) instructions and a [tutorial](https://kube-green.dev/docs/tutorials/kind/) for getting started in a kind cluster. You can also see it in action in this great [video](https://www.youtube.com/watch?v=cMWZOB7-WtY
 ) from Saiyam Pathak on his Kubesimplify channel.
