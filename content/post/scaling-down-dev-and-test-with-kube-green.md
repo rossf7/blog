@@ -9,10 +9,10 @@ description: >-
 tags:
   - kubernetes
   - sustainability
-title: Scaling down dev and test with kube-green
+title: Scaling down dev and test when not in use with kube-green
 ---
 
-I think one of the hardest things about green software is knowing where to start. The scope is very wide, there are many possible solutions, and it's a new and evolving area. Some approaches I’ve written about, like carbon aware [demand shifting](https://rossfairbanks.com/2023/07/12/carbon-aware-spatial-shifting-with-karmada/) can be complex and not all tasks can be scaled in this way.
+I think one of the hardest things about green software can be knowing where to start. The scope is wide, there are multiple possible solutions, and it's a new and evolving area. Some approaches I’ve written about, like carbon aware [demand shifting](https://rossfairbanks.com/2023/07/12/carbon-aware-spatial-shifting-with-karmada/) can seem complex and not all tasks can be scaled in this way.
 
 Measurement of your carbon emissions is a great place to start. You could use a dashboard from your cloud provider or an open source tool like [Cloud Carbon Footprint](https://www.cloudcarbonfootprint.org/). As without data you can’t tell where to focus your actions, or if they are helping or not. Yet, it’s natural to also want to take action to reduce your emissions. So what are some good first steps?
 
@@ -43,7 +43,7 @@ spec:
 
 This will suspend all cron jobs and scale down all deployments except api-gateway. This will happen at 20:00 each week day and wake up will happen at 08:00. During the weekend the pods will be scaled down.
 
-There is one more step needed. In our cluster we need the cluster-autoscaler running.  This will scale down the cluster nodes and scale them back up again. Usually this isn’t possible for on premise clusters. Although kube-green will free up resources so they can be used for other tasks.
+There is one more step needed. In our cluster we need the [cluster-autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) running.  This will scale down the cluster nodes and scale them back up again. Usually this isn’t possible for on premise clusters. Although kube-green will free up resources so they can be used for other tasks.
 
 The docs have [install](https://kube-green.dev/docs/install/) instructions and a [tutorial](https://kube-green.dev/docs/tutorials/kind/) for getting started in a kind cluster. You can also see it in action in this great [video](https://www.youtube.com/watch?v=cMWZOB7-WtY
 ) from Saiyam Pathak on his Kubesimplify channel.
