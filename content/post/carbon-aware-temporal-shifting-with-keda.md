@@ -140,6 +140,10 @@ Something I missed is that the WattTime API provides the marginal carbon intensi
 This is quite a complex area and there has been some discussion on which calculation is best to use. This [blog post](
 https://www.electricitymaps.com/blog/marginal-vs-average-real-time-decision-making) from Electricity Maps explains in more detail. For me this is another benefit of supporting multiple data sources in the carbon-intensity-exporter so users can choose which is best for them.
 
+## Update 2: September 2023
+
+As of [v0.2.0](https://github.com/Azure/kubernetes-carbon-intensity-exporter/releases/tag/v.0.2.0) of the kubernetes-carbon-intensity-exporter Electricity Maps is also supported. This was something I contributed so I was happy to be able to help with it.
+
 #### Credits
 
 - Photo by [Dariusz Piosik](https://unsplash.com/ko/@dariuszpi) on [Unsplash](https://unsplash.com/photos/Tl6XKz6I6wc).
