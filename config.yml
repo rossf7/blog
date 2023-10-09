@@ -32,6 +32,14 @@ menu:
       name: LinkedIn
       url: https://www.linkedin.com/in/rossfairbanks/
       weight: 30
+    - identifier: bluesky
+      name: Bluesky
+      url: https://bsky.app/profile/rossf7.bsky.social
+      weight: 40
+    - identifier: mastodon
+      name: Mastodon
+      url: https://mastodon.green/@rossf7
+      weight: 40
     - identifier: twitter
       name: Twitter
       url: https://twitter.com/rossf7
